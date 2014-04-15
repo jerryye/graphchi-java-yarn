@@ -130,6 +130,3 @@ Java and .NET applications. Take a look at YourKit's leading software products:
 
 -- Aapo Kyrola, 
 akyrola@cs.cmu.edu
-
-
-
