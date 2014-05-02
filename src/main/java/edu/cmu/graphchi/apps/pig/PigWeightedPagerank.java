@@ -47,6 +47,13 @@ import java.util.logging.Logger;
 public class PigWeightedPagerank extends PigGraphChiBase implements GraphChiProgram<Float, FloatPair> {
 
     private static Logger logger = Logger.getLogger("weighted_pagerank");
+    private int nIterations = 0;
+    private float randomResetProb = 0.05f;
+
+    public PigWeightedPagerank(String iterations, String randomResetProb) {
+        this.nIterations = Integer.parseInt(iterations);
+        this.randomResetProb = Float.parseFloat(randomResetProb);
+    }
 
     public void update(ChiVertex<Float, FloatPair> vertex, GraphChiContext context)  {
         if (context.getIteration() == 0) {
@@ -60,7 +67,7 @@ public class PigWeightedPagerank extends PigGraphChiBase implements GraphChiProg
             for(int i=0; i<vertex.numInEdges(); i++) {
                 sum += vertex.inEdge(i).getValue().second;
             }
-            vertex.setValue(0.15f + 0.85f * sum);
+            vertex.setValue(randomResetProb /context.getNumVertices() + (1- randomResetProb) * sum);
         }
 
         /* Accumulate edge weights */
@@ -121,7 +128,7 @@ public class PigWeightedPagerank extends PigGraphChiBase implements GraphChiProg
         engine.setVertexDataConverter(new FloatConverter());
         engine.setModifiesInedges(false); // Important optimization
 
-        engine.run(this, 4);
+        engine.run(this, nIterations);
 
         logger.info("Ready.");
 

@@ -25,7 +25,8 @@ import java.util.logging.Logger;
  * Contributed by Jerry Ye, 2014.
  */
 public class WeightedPagerank implements GraphChiProgram<Float, FloatPair> {
-    
+
+    private static float randomResetProb = 0.15f;
     private static Logger logger = ChiLogger.getLogger("weighted_pagerank");
 
     public void update(ChiVertex<Float, FloatPair> vertex, GraphChiContext context)  {
@@ -40,7 +41,7 @@ public class WeightedPagerank implements GraphChiProgram<Float, FloatPair> {
             for(int i=0; i<vertex.numInEdges(); i++) {
                 sum += vertex.inEdge(i).getValue().second;
             }
-            vertex.setValue(0.15f + 0.85f * sum);
+            vertex.setValue(randomResetProb/context.getNumVertices() + (1-randomResetProb) * sum);
         }
 
         /* Accumulate edge weights */
@@ -116,8 +117,10 @@ public class WeightedPagerank implements GraphChiProgram<Float, FloatPair> {
         engine.setEdataConverter(new FloatPairConverter());
         engine.setVertexDataConverter(new FloatConverter());
         engine.setModifiesInedges(false); // Important optimization
+        int nIters = (args.length >= 4) ? Integer.parseInt(args[3]) : 4;
+        randomResetProb = (args.length >= 5) ? Float.parseFloat(args[4]) : randomResetProb;
 
-        engine.run(new WeightedPagerank(), 4);
+        engine.run(new WeightedPagerank(), nIters);
 
         logger.info("Ready.");
 
